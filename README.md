@@ -2,7 +2,7 @@
 
 
 ## Agenda
-- [Git](/git/workspace)
+- [Git](/git/)
 - [Python](/python/workspace)
 
 ## Description
