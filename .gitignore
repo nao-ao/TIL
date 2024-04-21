@@ -1,0 +1,7 @@
+python/.local
+python/.cache
+python/.bash_history
+
+python/Dockerfile
+python/Makefile
+python/entrypoint.sh
