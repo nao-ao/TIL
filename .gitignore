@@ -1,3 +1,5 @@
+.DS_Store
+
 python/.local
 python/.cache
 python/.bash_history
