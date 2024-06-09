@@ -92,3 +92,46 @@ git rm -r --cached [ファイル名]
 ```bash
 git checkout [ファイル名]
 ```
+
+# チーム開発フロー
+
+```mermaid
+sequenceDiagram
+  main ->> feature/A : git checkout -b fearure/A
+  Note over feature/A : 編集
+  Note over feature/A : add
+  Note over feature/A : commit
+  Note over feature/A : push origin feature/A
+  feature/A ->> main : PR
+  actor reviewer
+  actor new_reviewer
+  actor server
+  alt 既にクローンしている場合
+    main ->> reviewer : Review
+    Note over reviewer : git stash -u (未コミットの場合)
+    Note over reviewer : git fetch
+    Note over reviewer : (git branch -a)
+    Note over reviewer : git checkout feature/A
+  else 初めて触る場合
+    main ->> new_reviewer : Review
+    Note over new_reviewer : git clone
+    Note over new_reviewer : git checkout feature/A
+  end
+  Note over reviewer, new_reviewer : 動作確認
+  Note over reviewer, new_reviewer : 問題があればコメント & 修正
+  new_reviewer ->> main : 問題なければ GitHub 上で merge
+  reviewer ->> main : 
+  main ->> server : 本番サーバーでソースコードを更新
+  Note over server : make stop
+  Note over server : pull (pull origin main)
+  Note over server : make build
+  Note over server : make run
+  Note over reviewer : 元々いた自分のブランチに戻る (feature/B など)
+  Note over reviewer : git checkout feature/B
+  Note over reviewer : 未コミット場合, 内容を戻す
+  Note over reviewer : git stash list (退避作業IDの一覧確認)
+  Note over reviewer : git stash apply stash@{0}  
+  Note over reviewer : 再度作業を開始
+  Note over new_reviewer : git pul;
+  Note over new_reviewer : git checkout main
+```
