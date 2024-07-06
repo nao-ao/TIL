@@ -7,5 +7,3 @@ python/.bash_history
 python/Dockerfile
 python/Makefile
 python/entrypoint.sh
-
-mermaid/

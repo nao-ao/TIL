@@ -5,7 +5,3 @@
 - 削除 remove:
 - 仕様の変更 change:
 - 整理 clean:
-
-# チーム開発フロー
-
-![diagram](./team_mermaid-1.svg)
