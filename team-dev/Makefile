@@ -10,7 +10,7 @@ to/pdf:
 to/pdf:
 	@docker run --rm -u `id -u`:`id -g` -v $(DIAGRAM_DIR)/mermaid:/data minlag/mermaid-cli -i /data/${filename}.md -o /data/${filename}.pdf
 
-# make to/md input=team.md output=team2.md
+# make to/graph input=mermaid.md output=mermaid-svg.md
 .PHONY: to/graph
 to/graph:
 	@docker run --rm -u `id -u`:`id -g` -v $(DIAGRAM_DIR)/mermaid:/data minlag/mermaid-cli -i /data/${input} -o /data/${output}

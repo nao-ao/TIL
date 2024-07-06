@@ -25,7 +25,7 @@ sequenceDiagram
     Person A ->> develop : PR を作成
     end
 
-    Note over develop : merge
+    Note over develop : Review 開始
 
     alt 既にクローンしている場合
     develop ->> Person B : Review
@@ -58,26 +58,40 @@ sequenceDiagram
     Note over Person B : git stash list (退避作業IDの一覧確認)
     Note over Person B : git stash apply stash@{0}  
 
-    alt 問題ない場合
+
+    alt develop への merge が成功した場合
+
+        Note over Person B, Person D : 最新のブランチの内容を自分のローカルに反映
         develop ->> Person B : 最新のブランチの内容を自分のローカルに反映
-        Note over Person B : (問題ない場合) 最新のブランチの内容を自分のローカルに反映
-        Note over Person B : git fetch
-        Note over Person B : git merge origin/develop
+        develop ->> Person C : 
+        develop ->> Person D : 
+
+        Note over Person B : git checkout feature/B
+        alt 方法 1
+            Note over Person B : git fetch
+            Note over Person B : git merge develop
+        end
+        alt 方法 2
+            Note over Person B : git pull origin develop
+        end
         Note over Person B : コンフリクトの解消
-    end
+        Note over Person B : 再度作業を開始
 
-    Note over Person B : 再度作業を開始
+        Note over Person C : git fetch
+        Note over Person C : git checkout develop
+        Note over Person C : git checkout -b feature/C
+        Note over Person C : 作業を開始
 
-    Note over Person C : git pul;
-    Note over Person C : git checkout develop
-    Note over Person C : git checkout -b feature/C
-
-    alt 問題ない場合
-        develop ->> Person D : 最新のブランチの内容を自分のローカルに反映
-        Note over Person D : 元々いた自分のブランチに戻る (feature/D など)
-        Note over Person D : git fetch
-        Note over Person D : git merge origin/develop
+        Note over Person D : git checkout feature/D
+        alt 方法 1
+            Note over Person D : git fetch
+            Note over Person D : git merge develop
+        end
+        alt 方法 2
+            Note over Person D : git pull origin develop
+        end
         Note over Person D : コンフリクトの解消
+        Note over Person D : 再度作業を開始
     end
 
     develop ->> main : 最新のブランチの内容を main に反映
