@@ -16,6 +16,16 @@ sequenceDiagram
     Note over Person A : push origin feature/A
     Person A ->> develop : PR を作成
 
+    alt conflict が起きた場合
+    develop ->> Person A : git pull origin develop
+    Note over Person A : コンフリクトの解消
+    Note over Person A : git add
+    Note over Person A : git commit
+    Note over Person A : git push origin fearure/A
+    Person A ->> develop : PR を作成
+    end
+
+    Note over develop : merge
 
     alt 既にクローンしている場合
     develop ->> Person B : Review
