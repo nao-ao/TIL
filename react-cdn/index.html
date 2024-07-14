@@ -16,55 +16,201 @@
 
   <script src="https://cdn.jsdelivr.net/npm/semantic-ui-react/dist/umd/semantic-ui-react.min.js"></script>
 
-
   <script type="text/babel">
-    const { Container, Button, MenuMenu, MenuItem, Menu, Segment, GridRow, GridColumn, Grid, Image, Divider, CardMeta, CardHeader, CardGroup, CardDescription, CardContent, Card } = semanticUIReact
- 
-    const el = (
-      <div>
-        <Menu pointing secondary>
-          <MenuItem
-            name='home'
-            active="true"
-            href="../react-cdn/home.html"
-          />
-          <MenuItem
-            name='messages'
-          />
-          <MenuItem
-            name='friends'
-          />
-          <MenuMenu position='right'>
-            <MenuItem
-              name='logout'
-            />
-          </MenuMenu>
-        </Menu>
-        <Container>
+    const { FormField, Form, Input, Icon, CardGroup, Card, CardContent, Container, Button, Segment, Dropdown, Menu, ButtonGroup, Label, GridRow, GridColumn, Grid } = semanticUIReact
 
-          <h1>Hello, world!</h1>
+    const useState = React.useState;
+    const useEffect = React.useEffect;
 
-          <Divider />
+    const App = () => {
+      const [radioQuestions, setRadioQuestions] = useState([])
 
-          <Grid stackable columns={2}>
-            <GridColumn>
-              <p>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>
-            </GridColumn>
-            <GridColumn>
-              <p>Column 2</p>
-            </GridColumn>
-          </Grid>
+      const handleAddRadio = () => {
+        setRadioQuestions((prev) => [
+          ...prev,
+          { title: "", options: [] }
+        ]);
+      }
+
+      const handleAddRadioOption = (index) => {
+        setRadioQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[index].options.push({ value: "" });
+          return newQuestions;
+        });
+      }
+
+      const handleCopyQuestion = (index) => {
+        setRadioQuestions((prev) => {
+          const newQuestion = { ...prev[index], options: [...prev[index].options] };
+          return [
+            ...prev.slice(0, index + 1),
+            newQuestion,
+            ...prev.slice(index + 1)
+          ];
+        });
+      }
+
+      const handleDeleteQuestion = (index) => {
+        setRadioQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions.splice(index, 1);
+          return newQuestions;
+        });
+      }
+
+      const handleMoveQuestionUp = (index) => {
+        setRadioQuestions((prev) => {
+          if (index === 0) return prev;
+          const newQuestions = [...prev];
+          const temp = newQuestions[index - 1];
+          newQuestions[index - 1] = newQuestions[index];
+          newQuestions[index] = temp;
+          return newQuestions;
+        });
+      }
+
+      const handleMoveQuestionDown = (index) => {
+        setRadioQuestions((prev) => {
+          if (index === prev.length - 1) return prev;
+          const newQuestions = [...prev];
+          const temp = newQuestions[index + 1];
+          newQuestions[index + 1] = newQuestions[index];
+          newQuestions[index] = temp;
+          return newQuestions;
+        });
+      }
+
+      const handleChangeTitle = (index, value) => {
+        setRadioQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[index].title = value;
+          return newQuestions;
+        });
+      }
+
+      const handleChangeOption = (questionIndex, optionIndex, value) => {
+        setRadioQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[questionIndex].options[optionIndex].value = value;
+          return newQuestions;
+        });
+      }
+
+      const handleCopyRadioOption = (questionIndex, optionIndex) => {
+        setRadioQuestions((prev) => {
+          const newQuestions = [...prev];
+          const newOption = { ...newQuestions[questionIndex].options[optionIndex] };
+          newQuestions[questionIndex].options.splice(optionIndex + 1, 0, newOption);
+          return newQuestions;
+        });
+      }
+
+      const handleDeleteRadioOption = (questionIndex, optionIndex) => {
+        setRadioQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[questionIndex].options.splice(optionIndex, 1);
+          return newQuestions;
+        });
+      }
+
+      const handleMoveRadioOptionUp = (questionIndex, optionIndex) => {
+        setRadioQuestions((prev) => {
+          if (optionIndex === 0) return prev;
+          const newQuestions = [...prev];
+          const temp = newQuestions[questionIndex].options[optionIndex - 1];
+          newQuestions[questionIndex].options[optionIndex - 1] = newQuestions[questionIndex].options[optionIndex];
+          newQuestions[questionIndex].options[optionIndex] = temp;
+          return newQuestions;
+        });
+      }
+
+      const handleMoveRadioOptionDown = (questionIndex, optionIndex) => {
+        setRadioQuestions((prev) => {
+          if (optionIndex === prev[questionIndex].options.length - 1) return prev;
+          const newQuestions = [...prev];
+          const temp = newQuestions[questionIndex].options[optionIndex + 1];
+          newQuestions[questionIndex].options[optionIndex + 1] = newQuestions[questionIndex].options[optionIndex];
+          newQuestions[questionIndex].options[optionIndex] = temp;
+          return newQuestions;
+        });
+      }
+
+      return (
+        <div>
+          <Container>
+            <CardGroup>
+              {radioQuestions.map((question, index) => (
+                <Card key={index} fluid color='red' header={`Option ${index + 1}`}>
+                  <CardContent>
+                    <Segment basic textAlign="right">
+                      <Button icon='copy' onClick={() => handleCopyQuestion(index)}/>
+                      <Button icon='trash' onClick={() => handleDeleteQuestion(index)} />
+                      <Button icon='arrow down' onClick={() => handleMoveQuestionDown(index)} />
+                      <Button icon='arrow up' onClick={() => handleMoveQuestionUp(index)} />
+                    </Segment>
+                    <Form>
+                      <Input
+                        fluid
+                        label={`質問 ${index + 1}`}
+                        labelPosition="left"
+                        placeholder='質問'
+                        value={question.title}
+                        onChange={(e) => handleChangeTitle(index, e.target.value)}
+                      />
+                      {question.options.map((option, optionIndex) => (
+                        <Segment basic key={optionIndex}>
+                          <FormField>
+                            <Grid verticalAlign="middle" centered>
+                              <GridRow>
+                                <GridColumn width={1}>
+                                  <Icon disabled name='circle outline' />
+                                </GridColumn>
+                                <GridColumn width={10}>
+                                  <Input
+                                    placeholder='オプション'
+                                    value={option.value}
+                                    onChange={(e) => handleChangeOption(index, optionIndex, e.target.value)}
+                                  />
+                                </GridColumn>
+                                <GridColumn width={5}>
+                                  <Button icon='arrow up' onClick={() => handleMoveRadioOptionUp(index, optionIndex)} />
+                                  <Button icon='arrow down' onClick={() => handleMoveRadioOptionDown(index, optionIndex)} />
+                                  <Button icon='trash' onClick={() => handleDeleteRadioOption(index, optionIndex)} />
+                                  <Button icon='copy' onClick={() => handleCopyRadioOption(index, optionIndex)}/>
+                                </GridColumn>
+                              </GridRow>
+                            </Grid>
 
 
+                          </FormField>
+                        </Segment>
+                      ))}
+                    </Form>
+                    <Segment basic>
+                      <Button onClick={() => handleAddRadioOption(index)}>オプションを追加</Button>
+                    </Segment>
+                  </CardContent>
+                </Card>
+              ))}
+            </CardGroup>
+            <Segment basic>
+              <Dropdown text='新規追加' pointing="top left" button>
+                <Dropdown.Menu>
+                  <Dropdown.Item text="テキスト・自由記述"></Dropdown.Item>
+                  <Dropdown.Item text="単一選択" onClick={handleAddRadio}></Dropdown.Item>
+                  <Dropdown.Item text="複数選択"></Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </Segment>
+          </Container>
+        </div>
+      )
+    }
 
-        </Container>
-      </div>
-    )
-    const domContainer = document.querySelector('#app')
-    const root = ReactDOM.createRoot(domContainer)
-    root.render(el)
+    const container = document.getElementById("app");
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
   </script>
-    
- 
 </body>
 </html>
