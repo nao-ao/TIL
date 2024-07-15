@@ -17,13 +17,14 @@
   <script src="https://cdn.jsdelivr.net/npm/semantic-ui-react/dist/umd/semantic-ui-react.min.js"></script>
 
   <script type="text/babel">
-    const { FormField, Form, Input, Icon, CardGroup, Card, CardContent, Container, Button, Segment, Dropdown, Menu, Checkbox, GridRow, GridColumn, Grid, Divider, Radio, Label, TextArea } = semanticUIReact
+    const { FormField, Form, Input, Icon, CardGroup, Card, CardContent, CardHeader, Container, Button, Segment, Dropdown, Menu, Checkbox, GridRow, GridColumn, Grid, Divider, Radio, Label, TextArea } = semanticUIReact
 
     const useState = React.useState;
     const useEffect = React.useEffect;
 
     const App = () => {
       const [questions, setQuestions] = useState([]);
+      const [isPreview, setIsPreview] = useState(false);
 
       const handleAddQuestion = (type) => {
         setQuestions((prev) => [
@@ -153,102 +154,150 @@
         });
       }
 
+      const handlePreview = () => {
+        setIsPreview(true);
+      }
+
+      const handleBack = () => {
+        setIsPreview(false);
+      }
+
       return (
         <div>
           <Container>
             <Segment basic>
-              <Button>作成</Button>
-              <Button>プレビュー</Button>
+              <Button onClick={handleBack} disabled={!isPreview}>作成</Button>
+              <Button onClick={handlePreview} disabled={isPreview}>プレビュー</Button>
             </Segment>
             <Divider />
-            <CardGroup>
-              {questions.map((question, index) => (
-                <Card key={index} fluid color={question.type === 'radio' ? 'red' : question.type === 'checkbox' ? 'blue' : 'grey'} header={`${question.type === 'radio' ? 'Radio' : question.type === 'checkbox' ? 'Checkbox' : 'Text'} Question ${index + 1}`}>
-                  <CardContent>
-                    <Segment basic textAlign="right">
-                      <Button icon='copy' onClick={() => handleCopyQuestion(index)}/>
-                      <Button icon='trash' onClick={() => handleDeleteQuestion(index)} />
-                      <Button icon='arrow down' onClick={() => handleMoveQuestionDown(index)} />
-                      <Button icon='arrow up' onClick={() => handleMoveQuestionUp(index)} />
-                    </Segment>
-                    <Form>
-                      <Input
-                        fluid
-                        label={`質問 ${index + 1}`}
-                        labelPosition="left"
-                        placeholder='質問'
-                        value={question.title}
-                        onChange={(e) => handleChangeTitle(index, e.target.value)}
-                      />
-                      {question.type !== 'text' && question.options.map((option, optionIndex) => (
-                        <Segment basic key={optionIndex}>
-                          <FormField>
-                            <Grid verticalAlign="middle" centered>
-                              <GridRow>
-                                <GridColumn width={1}>
-                                  <label>{question.type === 'radio' ? <Radio disabled /> : <Checkbox disabled />}</label>
-                                </GridColumn>
-                                <GridColumn width={10}>
-                                  <Input
-                                  placeholder='オプション'
-                                  value={option.value}
-                                  onChange={(e) => handleChangeOption(index, optionIndex, e.target.value)}
-                                />
-                                </GridColumn>
-                                <GridColumn width={5}>
-                                  <Button icon='copy' onClick={() => handleCopyOption(index, optionIndex)}/>
-                                  <Button icon='trash' onClick={() => handleDeleteOption(index, optionIndex)} />
-                                  <Button icon='arrow down' onClick={() => handleMoveOptionDown(index, optionIndex)} />
-                                  <Button icon='arrow up' onClick={() => handleMoveOptionUp(index, optionIndex)} />
-                                  </GridColumn>
-                              </GridRow>
-                            </Grid>
-                          </FormField>
-                        </Segment>
-                      ))}
-                      {question.type === 'text' && (
-                        <div>
-                          <Segment basic>
-                            <FormField disabled>
-                              <TextArea placeholder='回答を入力してください。' />
-                            </FormField>
-                          </Segment>
-                          <Divider />
-                          <Segment basic textAlign="right">
-                            <Checkbox label="必須" toggle checked={question.isRequired} onChange={() => handleToggleRequired(index)} />
-                          </Segment>
-                        </div>
-                      )}
-                    </Form>
-                    {question.type !== 'text' && (
-                      <div>
-                        <Segment basic>
-                          <Button onClick={() => handleAddOption(index)}>オプションを追加</Button>
-                        </Segment>
-                        <Divider />
+            {isPreview ? (
+              <Preview questions={questions} />
+            ) : (
+              <div>
+                <CardGroup>
+                  {questions.map((question, index) => (
+                    <Card key={index} fluid color={question.type === 'radio' ? 'red' : question.type === 'checkbox' ? 'blue' : 'grey'}>
+                      <CardContent>
                         <Segment basic textAlign="right">
-                          <Checkbox label="必須" toggle checked={question.isRequired} onChange={() => handleToggleRequired(index)} />
-                          <Checkbox style={{ marginLeft: '10px' }} label="複数回答" toggle checked={question.isMultiple} onChange={() => handleToggleMultiple(index)} />
+                          <Button icon='copy' onClick={() => handleCopyQuestion(index)}/>
+                          <Button icon='trash' onClick={() => handleDeleteQuestion(index)} />
+                          <Button icon='arrow down' onClick={() => handleMoveQuestionDown(index)} />
+                          <Button icon='arrow up' onClick={() => handleMoveQuestionUp(index)} />
                         </Segment>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </CardGroup>
-            <Segment basic>
-              <Dropdown text='新規追加' pointing="top left" button>
-                <Dropdown.Menu>
-                  <Dropdown.Item text="テキスト・自由記述" onClick={() => handleAddQuestion('text')}></Dropdown.Item>
-                  <Dropdown.Item text="単一選択" onClick={() => handleAddQuestion('radio')}></Dropdown.Item>
-                  <Dropdown.Item text="複数選択" onClick={() => handleAddQuestion('checkbox')}></Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            </Segment>
+                        <Form>
+                          <Input
+                            fluid
+                            label={`質問 ${index + 1}`}
+                            labelPosition="left"
+                            placeholder='質問'
+                            value={question.title}
+                            onChange={(e) => handleChangeTitle(index, e.target.value)}
+                          />
+                          {question.type !== 'text' && question.options.map((option, optionIndex) => (
+                            <Segment basic key={optionIndex}>
+                              <FormField>
+                                <Grid verticalAlign="middle" centered>
+                                  <GridRow>
+                                    <GridColumn width={1}>
+                                      <label>{question.type === 'radio' ? <Radio disabled /> : <Checkbox disabled />}</label>
+                                    </GridColumn>
+                                    <GridColumn width={10}>
+                                      <Input
+                                        placeholder='オプション'
+                                        value={option.value}
+                                        onChange={(e) => handleChangeOption(index, optionIndex, e.target.value)}
+                                      />
+                                    </GridColumn>
+                                    <GridColumn width={5}>
+                                      <Button icon='copy' onClick={() => handleCopyOption(index, optionIndex)}/>
+                                      <Button icon='trash' onClick={() => handleDeleteOption(index, optionIndex)} />
+                                      <Button icon='arrow down' onClick={() => handleMoveOptionDown(index, optionIndex)} />
+                                      <Button icon='arrow up' onClick={() => handleMoveOptionUp(index, optionIndex)} />
+                                    </GridColumn>
+                                  </GridRow>
+                                </Grid>
+                              </FormField>
+                            </Segment>
+                          ))}
+                          {question.type === 'text' && (
+                            <div>
+                              <Segment basic>
+                                <FormField disabled>
+                                  <TextArea placeholder='回答を入力してください。' />
+                                </FormField>
+                              </Segment>
+                              <Divider />
+                              <Segment basic textAlign="right">
+                                <Checkbox label="必須" toggle checked={question.isRequired} onChange={() => handleToggleRequired(index)} />
+                              </Segment>
+                            </div>
+                          )}
+                        </Form>
+                        {question.type !== 'text' && (
+                          <div>
+                            <Segment basic>
+                              <Button onClick={() => handleAddOption(index)}>オプションを追加</Button>
+                            </Segment>
+                            <Divider />
+                            <Segment basic textAlign="right">
+                              <Checkbox label="必須" toggle checked={question.isRequired} onChange={() => handleToggleRequired(index)} />
+                              <Checkbox style={{ marginLeft: '10px' }} label="複数回答" toggle checked={question.isMultiple} onChange={() => handleToggleMultiple(index)} />
+                            </Segment>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </CardGroup>
+                <Segment basic>
+                  <Dropdown text='新規追加' pointing="top left" button>
+                    <Dropdown.Menu>
+                      <Dropdown.Item text="テキスト・自由記述" onClick={() => handleAddQuestion('text')}></Dropdown.Item>
+                      <Dropdown.Item text="単一選択" onClick={() => handleAddQuestion('radio')}></Dropdown.Item>
+                      <Dropdown.Item text="複数選択" onClick={() => handleAddQuestion('checkbox')}></Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Segment>
+              </div>
+            )}
           </Container>
         </div>
       )
     }
+
+    const Preview = ({ questions }) => (
+      <Container>
+          {questions.map((question, index) => (
+            <Segment key={index} basic>
+              <p>{`${index + 1}. ${question.title}${question.isRequired ? ' *' : ''}`}</p>
+              <Form>
+                {question.type === 'text' ? (
+                  <Segment basic>
+                    <FormField>
+                      <TextArea placeholder='回答を入力してください。' />
+                    </FormField>
+                  </Segment>
+                ) : (
+                  question.options.map((option, optionIndex) => (
+                    <Segment basic key={optionIndex}>
+                      <FormField>
+                        {question.type === 'radio' ? (
+                          <Radio label={option.value} name={`question_${index}`} />
+                        ) : (
+                          <Checkbox label={option.value} />
+                        )}
+                      </FormField>
+                    </Segment>
+                  ))
+                )}
+              </Form>
+            </Segment>
+          ))}
+          <Segment basic>
+            <Button>送信</Button>
+          </Segment>
+      </Container>
+    );
 
     const container = document.getElementById("app");
     const root = ReactDOM.createRoot(container);
