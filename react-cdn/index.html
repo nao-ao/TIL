@@ -17,23 +17,23 @@
   <script src="https://cdn.jsdelivr.net/npm/semantic-ui-react/dist/umd/semantic-ui-react.min.js"></script>
 
   <script type="text/babel">
-    const { FormField, Form, Input, Icon, CardGroup, Card, CardContent, Container, Button, Segment, Dropdown, Menu, ButtonGroup, Label, GridRow, GridColumn, Grid } = semanticUIReact
+    const { FormField, Form, Input, Icon, CardGroup, Card, CardContent, Container, Button, Segment, Dropdown, Menu, Checkbox, GridRow, GridColumn, Grid, Divider, Radio, Label, TextArea } = semanticUIReact
 
     const useState = React.useState;
     const useEffect = React.useEffect;
 
     const App = () => {
-      const [radioQuestions, setRadioQuestions] = useState([])
+      const [questions, setQuestions] = useState([]);
 
-      const handleAddRadio = () => {
-        setRadioQuestions((prev) => [
+      const handleAddQuestion = (type) => {
+        setQuestions((prev) => [
           ...prev,
-          { title: "", options: [] }
+          { type, title: "", options: [], isRequired: false, isMultiple: type === 'checkbox' }
         ]);
       }
 
-      const handleAddRadioOption = (index) => {
-        setRadioQuestions((prev) => {
+      const handleAddOption = (index) => {
+        setQuestions((prev) => {
           const newQuestions = [...prev];
           newQuestions[index].options.push({ value: "" });
           return newQuestions;
@@ -41,7 +41,7 @@
       }
 
       const handleCopyQuestion = (index) => {
-        setRadioQuestions((prev) => {
+        setQuestions((prev) => {
           const newQuestion = { ...prev[index], options: [...prev[index].options] };
           return [
             ...prev.slice(0, index + 1),
@@ -52,7 +52,7 @@
       }
 
       const handleDeleteQuestion = (index) => {
-        setRadioQuestions((prev) => {
+        setQuestions((prev) => {
           const newQuestions = [...prev];
           newQuestions.splice(index, 1);
           return newQuestions;
@@ -60,7 +60,7 @@
       }
 
       const handleMoveQuestionUp = (index) => {
-        setRadioQuestions((prev) => {
+        setQuestions((prev) => {
           if (index === 0) return prev;
           const newQuestions = [...prev];
           const temp = newQuestions[index - 1];
@@ -71,7 +71,7 @@
       }
 
       const handleMoveQuestionDown = (index) => {
-        setRadioQuestions((prev) => {
+        setQuestions((prev) => {
           if (index === prev.length - 1) return prev;
           const newQuestions = [...prev];
           const temp = newQuestions[index + 1];
@@ -82,7 +82,7 @@
       }
 
       const handleChangeTitle = (index, value) => {
-        setRadioQuestions((prev) => {
+        setQuestions((prev) => {
           const newQuestions = [...prev];
           newQuestions[index].title = value;
           return newQuestions;
@@ -90,15 +90,15 @@
       }
 
       const handleChangeOption = (questionIndex, optionIndex, value) => {
-        setRadioQuestions((prev) => {
+        setQuestions((prev) => {
           const newQuestions = [...prev];
           newQuestions[questionIndex].options[optionIndex].value = value;
           return newQuestions;
         });
       }
 
-      const handleCopyRadioOption = (questionIndex, optionIndex) => {
-        setRadioQuestions((prev) => {
+      const handleCopyOption = (questionIndex, optionIndex) => {
+        setQuestions((prev) => {
           const newQuestions = [...prev];
           const newOption = { ...newQuestions[questionIndex].options[optionIndex] };
           newQuestions[questionIndex].options.splice(optionIndex + 1, 0, newOption);
@@ -106,16 +106,16 @@
         });
       }
 
-      const handleDeleteRadioOption = (questionIndex, optionIndex) => {
-        setRadioQuestions((prev) => {
+      const handleDeleteOption = (questionIndex, optionIndex) => {
+        setQuestions((prev) => {
           const newQuestions = [...prev];
           newQuestions[questionIndex].options.splice(optionIndex, 1);
           return newQuestions;
         });
       }
 
-      const handleMoveRadioOptionUp = (questionIndex, optionIndex) => {
-        setRadioQuestions((prev) => {
+      const handleMoveOptionUp = (questionIndex, optionIndex) => {
+        setQuestions((prev) => {
           if (optionIndex === 0) return prev;
           const newQuestions = [...prev];
           const temp = newQuestions[questionIndex].options[optionIndex - 1];
@@ -125,8 +125,8 @@
         });
       }
 
-      const handleMoveRadioOptionDown = (questionIndex, optionIndex) => {
-        setRadioQuestions((prev) => {
+      const handleMoveOptionDown = (questionIndex, optionIndex) => {
+        setQuestions((prev) => {
           if (optionIndex === prev[questionIndex].options.length - 1) return prev;
           const newQuestions = [...prev];
           const temp = newQuestions[questionIndex].options[optionIndex + 1];
@@ -136,12 +136,34 @@
         });
       }
 
+      const handleToggleRequired = (index) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[index].isRequired = !newQuestions[index].isRequired;
+          return newQuestions;
+        });
+      }
+
+      const handleToggleMultiple = (index) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[index].isMultiple = !newQuestions[index].isMultiple;
+          newQuestions[index].type = newQuestions[index].isMultiple ? 'checkbox' : 'radio';
+          return newQuestions;
+        });
+      }
+
       return (
         <div>
           <Container>
+            <Segment basic>
+              <Button>作成</Button>
+              <Button>プレビュー</Button>
+            </Segment>
+            <Divider />
             <CardGroup>
-              {radioQuestions.map((question, index) => (
-                <Card key={index} fluid color='red' header={`Option ${index + 1}`}>
+              {questions.map((question, index) => (
+                <Card key={index} fluid color={question.type === 'radio' ? 'red' : question.type === 'checkbox' ? 'blue' : 'grey'} header={`${question.type === 'radio' ? 'Radio' : question.type === 'checkbox' ? 'Checkbox' : 'Text'} Question ${index + 1}`}>
                   <CardContent>
                     <Segment basic textAlign="right">
                       <Button icon='copy' onClick={() => handleCopyQuestion(index)}/>
@@ -158,38 +180,58 @@
                         value={question.title}
                         onChange={(e) => handleChangeTitle(index, e.target.value)}
                       />
-                      {question.options.map((option, optionIndex) => (
+                      {question.type !== 'text' && question.options.map((option, optionIndex) => (
                         <Segment basic key={optionIndex}>
                           <FormField>
                             <Grid verticalAlign="middle" centered>
                               <GridRow>
                                 <GridColumn width={1}>
-                                  <Icon disabled name='circle outline' />
+                                  <label>{question.type === 'radio' ? <Radio disabled /> : <Checkbox disabled />}</label>
                                 </GridColumn>
                                 <GridColumn width={10}>
                                   <Input
-                                    placeholder='オプション'
-                                    value={option.value}
-                                    onChange={(e) => handleChangeOption(index, optionIndex, e.target.value)}
-                                  />
+                                  placeholder='オプション'
+                                  value={option.value}
+                                  onChange={(e) => handleChangeOption(index, optionIndex, e.target.value)}
+                                />
                                 </GridColumn>
                                 <GridColumn width={5}>
-                                  <Button icon='arrow up' onClick={() => handleMoveRadioOptionUp(index, optionIndex)} />
-                                  <Button icon='arrow down' onClick={() => handleMoveRadioOptionDown(index, optionIndex)} />
-                                  <Button icon='trash' onClick={() => handleDeleteRadioOption(index, optionIndex)} />
-                                  <Button icon='copy' onClick={() => handleCopyRadioOption(index, optionIndex)}/>
-                                </GridColumn>
+                                  <Button icon='copy' onClick={() => handleCopyOption(index, optionIndex)}/>
+                                  <Button icon='trash' onClick={() => handleDeleteOption(index, optionIndex)} />
+                                  <Button icon='arrow down' onClick={() => handleMoveOptionDown(index, optionIndex)} />
+                                  <Button icon='arrow up' onClick={() => handleMoveOptionUp(index, optionIndex)} />
+                                  </GridColumn>
                               </GridRow>
                             </Grid>
-
-
                           </FormField>
                         </Segment>
                       ))}
+                      {question.type === 'text' && (
+                        <div>
+                          <Segment basic>
+                            <FormField disabled>
+                              <TextArea placeholder='回答を入力してください。' />
+                            </FormField>
+                          </Segment>
+                          <Divider />
+                          <Segment basic textAlign="right">
+                            <Checkbox label="必須" toggle checked={question.isRequired} onChange={() => handleToggleRequired(index)} />
+                          </Segment>
+                        </div>
+                      )}
                     </Form>
-                    <Segment basic>
-                      <Button onClick={() => handleAddRadioOption(index)}>オプションを追加</Button>
-                    </Segment>
+                    {question.type !== 'text' && (
+                      <div>
+                        <Segment basic>
+                          <Button onClick={() => handleAddOption(index)}>オプションを追加</Button>
+                        </Segment>
+                        <Divider />
+                        <Segment basic textAlign="right">
+                          <Checkbox label="必須" toggle checked={question.isRequired} onChange={() => handleToggleRequired(index)} />
+                          <Checkbox style={{ marginLeft: '10px' }} label="複数回答" toggle checked={question.isMultiple} onChange={() => handleToggleMultiple(index)} />
+                        </Segment>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -197,9 +239,9 @@
             <Segment basic>
               <Dropdown text='新規追加' pointing="top left" button>
                 <Dropdown.Menu>
-                  <Dropdown.Item text="テキスト・自由記述"></Dropdown.Item>
-                  <Dropdown.Item text="単一選択" onClick={handleAddRadio}></Dropdown.Item>
-                  <Dropdown.Item text="複数選択"></Dropdown.Item>
+                  <Dropdown.Item text="テキスト・自由記述" onClick={() => handleAddQuestion('text')}></Dropdown.Item>
+                  <Dropdown.Item text="単一選択" onClick={() => handleAddQuestion('radio')}></Dropdown.Item>
+                  <Dropdown.Item text="複数選択" onClick={() => handleAddQuestion('checkbox')}></Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </Segment>
