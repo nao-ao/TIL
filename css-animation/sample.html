@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2/dist/semantic.min.css" />
+    <style>
+        .card {
+            transition: transform 300ms ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js" crossorigin></script>
+    <script type="text/babel">
+        const { useState } = React;
+
+        const App = () => {
+            const [questions, setQuestions] = useState([
+                { id: 1, text: 'Card A' },
+                { id: 2, text: 'Card B' },
+                { id: 3, text: 'Card C' }
+            ]);
+
+            const swapCards = (index1, index2) => {
+                if (index2 < 0 || index2 >= questions.length) return;
+
+                const card1 = document.getElementById(`card-${questions[index1].id}`);
+                const card2 = document.getElementById(`card-${questions[index2].id}`);
+
+                const duration = 300;
+                const diff = card2.offsetTop - card1.offsetTop;
+
+                card1.style.transform = `translateY(${diff}px)`;
+                card2.style.transform = `translateY(${-diff}px)`;
+
+                setTimeout(() => {
+                    const newQuestions = [...questions];
+                    [newQuestions[index1], newQuestions[index2]] = [newQuestions[index2], newQuestions[index1]];
+                    setQuestions(newQuestions);
+
+                    card1.style.transitionDuration = "0ms";
+                    card2.style.transitionDuration = "0ms";
+                    card1.style.transform = `translateY(0)`;
+                    card2.style.transform = `translateY(0)`;
+
+                    setTimeout(() => {
+                        card1.style.transitionDuration = `${duration}ms`;
+                        card2.style.transitionDuration = `${duration}ms`;
+                    }, 50);
+                }, duration);
+            };
+
+            return (
+                <div className="ui container">
+                    {questions.map((question, index) => (
+                        <div key={question.id} id={`card-${question.id}`} className="ui card">
+                            <div className="content">
+                                <div className="header">{question.text}</div>
+                            </div>
+                            <div className="extra content">
+                                <div className="ui two buttons">
+                                    <button className="ui button" onClick={() => swapCards(index, index - 1)}>
+                                        <i className="caret up icon"></i> Up
+                                    </button>
+                                    <button className="ui button" onClick={() => swapCards(index, index + 1)}>
+                                        <i className="caret down icon"></i> Down
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('app'));
+    </script>
+</body>
+
+</html>
