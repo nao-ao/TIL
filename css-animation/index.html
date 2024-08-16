@@ -5,7 +5,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>React!</title>
-  <link rel="stylesheet" type="text/css" href="../css-animation/style.css">
 </head>
 
 <body>
@@ -95,6 +94,22 @@
         swapCards(index, index + 1);
       };
 
+      const handleDrop = (index) => {
+        const draggedIndex = parseInt(window.event.dataTransfer.getData("index"));
+        console.log("draggedIndex", draggedIndex);
+        console.log("index", index);
+        swapCards(draggedIndex, index);
+      };
+
+      const dragStart = (e) => {
+        e.dataTransfer.setData("index", e.target.id.split("-")[1]);
+      };
+
+      const dragOver = (e) => {
+        // console.log("over e", e);
+        e.preventDefault();
+      };
+
       return (
         <div>
           <Container>
@@ -109,6 +124,10 @@
                     fluid
                     className={question.className}
                     style={question.style || {}}
+                    draggable={true}
+                    onDrop={() => handleDrop(index)}
+                    onDragStart={dragStart}
+                    onDragOver={dragOver}
                     color={question.type === 'radio' ? 'red' : question.type === 'checkbox' ? 'blue' : 'grey'}
                   >
                     <CardContent>
