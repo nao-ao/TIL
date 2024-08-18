@@ -96,8 +96,6 @@
 
       const handleDrop = (index) => {
         const draggedIndex = parseInt(window.event.dataTransfer.getData("index"));
-        console.log("draggedIndex", draggedIndex);
-        console.log("index", index);
         swapCards(draggedIndex, index);
       };
 
@@ -106,8 +104,16 @@
       };
 
       const dragOver = (e) => {
-        // console.log("over e", e);
         e.preventDefault();
+      };
+
+      const handleMouseEnter = (index) => {
+        document.getElementById(`card-${index}`).setAttribute('draggable', true);
+      };
+
+      const handleMouseLeave = (index) => {
+        console.log('leave', index);
+        document.getElementById(`card-${index}`).setAttribute('draggable', false);
       };
 
       return (
@@ -131,6 +137,17 @@
                     color={question.type === 'radio' ? 'red' : question.type === 'checkbox' ? 'blue' : 'grey'}
                   >
                     <CardContent>
+                      <Segment basic>
+                        <Icon
+                          name='arrows alternate'
+                          size="big"
+                          onDragStart={dragStart}
+                          onMouseEnter={() => handleMouseEnter(index)}
+                          onMouseLeave={() => handleMouseLeave(index)}
+                          style={{ cursor: 'grab' }}
+                        />
+
+                      </Segment>
                       <Segment basic>
                         <p>{index + 1} {question.type}</p>
                       </Segment>
