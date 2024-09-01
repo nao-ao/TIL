@@ -1,6 +1,601 @@
-<iframe
- src="http://localhost/chatbot/BTsl9RjTIiUDQoU2"
- style="width: 100%; height: 100%; min-height: 700px"
- frameborder="0"
- allow="microphone">
-</iframe>
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>React!</title>
+
+  <style>
+    #drugAndDropIcon {
+      background-image: url('img/drag.png');
+      margin: auto;
+      background-size: cover;
+      width: 26px;
+      height: 20px;
+      cursor: grab;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <link async rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2/dist/semantic.min.css" />
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js" crossorigin></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/semantic-ui-react/dist/umd/semantic-ui-react.min.js"></script>
+
+  <script type="text/babel">
+    const { FormField, Form, Input, Icon, CardGroup, Card, CardContent, CardHeader, Container, Button, Segment, Dropdown, Menu, Checkbox, GridRow, GridColumn, Grid, Divider, Radio, Label, TextArea, Image } = semanticUIReact
+
+    const useState = React.useState;
+    const useEffect = React.useEffect;
+
+    const App = () => {
+      const [enqueteForm, setEnqueteForm] = useState({
+        enqueteName: "",
+        enqueteSubtext: "",
+        questions: [],
+      });
+      const [questions, setQuestions] = useState([]);
+      const [isPreview, setIsPreview] = useState(false);
+
+      // useEffect(() => {
+      //   console.log('Questions\n', JSON.stringify(questions, null, 2));
+      // }, [questions]);
+
+      const handleAddQuestion = (type) => {
+        setQuestions((prev) => [
+          ...prev,
+          {
+            id: prev.length,
+            questionText: "",
+            questionSubtext: "",
+            questionTypeId: type === 'radio' ? 1 : type === 'checkbox' ? 2 : 3,
+            dropDownFlag: 0,
+            choice: [{
+              choiceText: "",
+            }, {
+              choiceText: "",
+            }],
+            isDraggable: false, // 初期状態ではドラッグ不可
+          }
+        ]);
+      };
+
+      const handleAddOption = (index) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[index].choice.push({ choiceText: "" });
+          return newQuestions;
+        });
+      };
+
+      const handleCopyQuestion = (index) => {
+        setQuestions((prev) => {
+          const newQuestion = { ...prev[index], choice: [...prev[index].choice] };
+          return [
+            ...prev.slice(0, index + 1),
+            newQuestion,
+            ...prev.slice(index + 1)
+          ];
+        });
+      }
+
+      const handleDeleteQuestion = (index) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions.splice(index, 1);
+          return newQuestions;
+        });
+      }
+
+
+      const swapCards = (index1, index2) => {
+        if (index2 < 0 || index2 >= questions.length) return;
+
+        const card1 = document.getElementById(`card-${index1}`);
+        const card2 = document.getElementById(`card-${index2}`);
+
+        if (!card1 || !card2) {
+          console.error('One of the cards is missing:', card1, card2);
+          return;
+        }
+
+        const duration = 300;
+        const diff = card2.offsetTop - card1.offsetTop;
+
+        // Ensure transitionDuration is set before applying transform
+        card1.style.transitionDuration = `${duration}ms`;
+        card2.style.transitionDuration = `${duration}ms`;
+
+        card1.style.transform = `translateY(${diff}px)`;
+        card2.style.transform = `translateY(${-diff}px)`;
+
+        setTimeout(() => {
+          const newQuestions = [...questions];
+          [newQuestions[index1], newQuestions[index2]] = [newQuestions[index2], newQuestions[index1]];
+          setQuestions(newQuestions);
+
+          card1.style.transitionDuration = "0ms";
+          card2.style.transitionDuration = "0ms";
+          card1.style.transform = `translateY(0)`;
+          card2.style.transform = `translateY(0)`;
+
+          setTimeout(() => {
+            card1.style.transitionDuration = `${duration}ms`;
+            card2.style.transitionDuration = `${duration}ms`;
+          }, 50);
+        }, duration);
+      };
+
+      const handleMoveQuestionUp = (index) => {
+        console.log('index from handleMoveQuestionUp', index);
+        swapCards(index, index - 1);
+      };
+
+      const handleMoveQuestionDown = (index) => {
+        console.log('index from handleMoveQuestionDown', index);
+        swapCards(index, index + 1);
+      };
+
+      // const handleMoveQuestionUp = (index) => {
+      //   setQuestions((prev) => {
+      //     if (index === 0) return prev;
+      //     const newQuestions = [...prev];
+      //     const temp = newQuestions[index - 1];
+      //     newQuestions[index - 1] = newQuestions[index];
+      //     newQuestions[index] = temp;
+      //     return newQuestions;
+      //   });
+      // }
+
+      // const handleMoveQuestionDown = (index) => {
+      //   setQuestions((prev) => {
+      //     if (index === prev.length - 1) return prev;
+      //     const newQuestions = [...prev];
+      //     const temp = newQuestions[index + 1];
+      //     newQuestions[index + 1] = newQuestions[index];
+      //     newQuestions[index] = temp;
+      //     return newQuestions;
+      //   });
+      // }
+
+      const handleChangeQuestionText = (index, value) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[index].questionText = value;
+          return newQuestions;
+        });
+      };
+
+      const handleChangeQuestionSubtext = (index, value) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[index].questionSubtext = value;
+          return newQuestions;
+        });
+      };
+
+      const handleChangeOption = (questionIndex, optionIndex, value) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[questionIndex].choice[optionIndex].choiceText = value;
+          return newQuestions;
+        });
+      };
+
+      const handleCopyOption = (questionIndex, optionIndex) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          const newOption = { ...newQuestions[questionIndex].choice[optionIndex] };
+          newQuestions[questionIndex].choice.splice(optionIndex + 1, 0, newOption);
+          return newQuestions;
+        });
+      }
+
+      const handleDeleteOption = (questionIndex, optionIndex) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[questionIndex].choice.splice(optionIndex, 1);
+          return newQuestions;
+        });
+      }
+
+      const handleMoveOptionUp = (questionIndex, optionIndex) => {
+        setQuestions((prev) => {
+          if (optionIndex === 0) return prev;
+          const newQuestions = [...prev];
+          const temp = newQuestions[questionIndex].choice[optionIndex - 1];
+          newQuestions[questionIndex].choice[optionIndex - 1] = newQuestions[questionIndex].choice[optionIndex];
+          newQuestions[questionIndex].choice[optionIndex] = temp;
+          return newQuestions;
+        });
+      }
+
+      const handleMoveOptionDown = (questionIndex, optionIndex) => {
+        setQuestions((prev) => {
+          if (optionIndex === prev[questionIndex].choice.length - 1) return prev;
+          const newQuestions = [...prev];
+          const temp = newQuestions[questionIndex].choice[optionIndex + 1];
+          newQuestions[questionIndex].choice[optionIndex + 1] = newQuestions[questionIndex].choice[optionIndex];
+          newQuestions[questionIndex].choice[optionIndex] = temp;
+          return newQuestions;
+        });
+      }
+
+      const handleToggleRequired = (index) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[index].requireFlag = !newQuestions[index].requireFlag;
+          return newQuestions;
+        });
+      }
+
+      const handleToggleMultiple = (index) => {
+        setQuestions((prev) => {
+          const newQuestions = [...prev];
+          newQuestions[index].questionTypeId = newQuestions[index].questionTypeId === 1 ? 2 : 1;
+          return newQuestions;
+        });
+      }
+
+      const handlePreview = () => {
+        setIsPreview(true);
+      }
+
+      const handleBack = () => {
+        setIsPreview(false);
+      }
+
+
+      const handleDrop = (index) => {
+        const draggedIndex = parseInt(window.event.dataTransfer.getData("index"));
+        swapCards(draggedIndex, index);
+      };
+
+      const [dragFlag, setDragFlag] = useState(false);
+      useEffect(() => {
+        console.log('dragFlag:', dragFlag);
+      }, [dragFlag]);
+      const dragStart = (e) => {
+        const id = e.currentTarget.id;
+        if (id && id.includes("-")) {
+          const index = parseInt(id.split("-")[1], 10);
+          e.dataTransfer.setData("index", index);
+          // setDragFlag(true);
+        } else {
+          console.error('Unexpected element id:', id);
+        }
+      };
+
+      const dragEnd = (e) => {
+        setDragFlag(false);
+      };
+
+      const dragOver = (e) => {
+        e.preventDefault();
+      };
+
+      const handleMouseEnter = (index) => {
+        // カード全体のdraggableをtrueにする
+        const card = document.getElementById(`card-${index}`);
+        if (card) {
+          card.setAttribute('draggable', true);
+        }
+        // setDragFlag(true);
+      };
+
+      const handleMouseLeave = (index) => {
+        // カード全体のdraggableをfalseにする
+        const card = document.getElementById(`card-${index}`);
+        if (card) {
+          card.setAttribute('draggable', false);
+        }
+        // setDragFlag(false);
+      };
+
+
+      const handleDifyButton = async () => {
+
+        const queryContent = `アンケートの作成を開始してください。ただし現在のアンケートは以下の様になっています。\n${JSON.stringify(questions, null, 2)}`;
+        console.log('queryContent\n' + queryContent);
+
+        try {
+          const response = await fetch('http://localhost/v1/chat-messages', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer app-dPpFFRg5vqYjP8ZuG0hSpHCa',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              "inputs": {
+                "enqueteName": enqueteForm.enqueteName
+              },
+              "query": queryContent,
+              "user": "abc-123"
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('Response data:', data);
+
+          // JSON データの解析とステートへの代入
+          let cleanedAnswer = data.answer;
+
+          // ```json と ``` を削除する
+          cleanedAnswer = cleanedAnswer.replace(/```json/g, '').replace(/```/g, '');
+
+          console.log('cleanedAnswer:', cleanedAnswer);
+
+          // 正しいJSONとして解析
+          const parsedData = JSON.parse(cleanedAnswer);
+
+          console.log('parsedData:', parsedData);
+
+          const { questionForm } = parsedData;
+
+          console.log('Parsed data:', questionForm);
+
+          // enqueteSubtext に値を代入
+          // setEnqueteForm({ ...enqueteForm, enqueteSubtext: questionForm.enqueteSubtext });
+          const formattedQuestions = questionForm.map((question) => ({
+            enqueteName: questionForm.enqueteName,
+            enqueteSubtext: questionForm.enqueteSubtext,
+            questionText: question.questionText,
+            questionSubtext: question.questionSubtext,
+            questionTypeId: question.questionTypeId,
+            dropDownFlag: question.dropDownFlag,
+            choice: question.choice.map((choice) => ({ choiceText: choice.choiceText }))
+          }));
+
+          setQuestions(formattedQuestions);
+
+        } catch (error) {
+          console.error('Error:', error);
+        }
+
+
+      };
+
+
+      return (
+        <Container>
+          <Segment basic>
+            <Button onClick={handleBack} disabled={!isPreview}>作成</Button>
+            <Button onClick={handlePreview} disabled={isPreview}>プレビュー</Button>
+            <Button onClick={handleDifyButton} disabled={isPreview} floated="right">Dify Button</Button>
+          </Segment>
+          <Form>
+            <FormField>
+              <Input
+                fluid
+                label={`アンケート名`}
+                labelPosition="left"
+                placeholder='アンケート名'
+                value={enqueteForm.enqueteName}
+                onChange={(e) => setEnqueteForm({ ...enqueteForm, enqueteName: e.target.value })}
+              />
+            </FormField>
+            <FormField>
+              <Input
+                fluid
+                label={`アンケートの補足`}
+                labelPosition="left"
+                placeholder='アンケートの補足'
+                value={enqueteForm.enqueteSubtext}
+                onChange={(e) => setEnqueteForm({ ...enqueteForm, enqueteSubtext: e.target.value })}
+              />
+            </FormField>
+          </Form>
+          {isPreview ? (
+            <Preview questions={questions} />
+          ) : (
+            <div>
+              <Segment basic padded>
+                <CardGroup>
+                  {questions.map((question, index) => (
+                    <Card
+                      key={index}
+                      id={`card-${index}`}
+                      fluid
+                      className={question.className}
+                      style={question.style || {}}
+                      draggable={question.isDraggable} // 初期はdraggable属性をfalseにしておく
+                      onDragStart={dragStart} // カード全体のドラッグを制御
+                      onDragEnd={dragEnd}
+                      onDrop={() => handleDrop(index)}
+                      onDragOver={dragOver}
+                      color={question.questionTypeId === 1 ? 'red' : question.questionTypeId === 2 ? 'blue' : 'grey'}
+                    >
+                      <CardContent className="card-content">
+                        {dragFlag ? (
+                          <div style={{ textAlign: 'center', padding: '10px' }}>
+                            <div id="drugAndDropIcon"
+                              onMouseDown={() => handleMouseEnter(index)} // マウスダウン時にドラッグ可能に
+                              onMouseLeave={() => handleMouseLeave(index)} // ホバーが外れたらドラッグ不可能に
+                            />
+                            <Form>
+                              <FormField>
+                                <Input
+                                  fluid
+                                  label={`質問 ${index + 1}`}
+                                  labelPosition="left"
+                                  placeholder='質問'
+                                  value={question.questionText}
+                                  onChange={(e) => handleChangeQuestionText(index, e.target.value)}
+                                />
+                              </FormField>
+                            </Form>
+                          </div>
+                        ) : (
+                          <div>
+                            <Grid>
+                              <GridRow>
+                                <GridColumn textAlign="center">
+                                  <div id="drugAndDropIcon"
+                                    onMouseDown={() => handleMouseEnter(index)} // マウスダウン時にドラッグ可能に
+                                    onMouseLeave={() => handleMouseLeave(index)} // ホバーが外れたらドラッグ不可能に
+                                  />
+                                </GridColumn>
+                              </GridRow>
+                            </Grid>
+                            <Segment basic textAlign="right">
+                              <Button icon='copy' onClick={() => handleCopyQuestion(index)} />
+                              <Button icon='trash' onClick={() => handleDeleteQuestion(index)} />
+                              <Button icon='arrow down' onClick={() => handleMoveQuestionDown(index)} />
+                              <Button icon='arrow up' onClick={() => handleMoveQuestionUp(index)} />
+                            </Segment>
+                            <Form>
+                              <FormField>
+                                <Input
+                                  fluid
+                                  label={`質問 ${index + 1}`}
+                                  labelPosition="left"
+                                  placeholder='質問'
+                                  value={question.questionText}
+                                  onChange={(e) => handleChangeQuestionText(index, e.target.value)}
+                                />
+                              </FormField>
+                              <FormField>
+                                <Input
+                                  fluid
+                                  label='補足'
+                                  placeholder='補足'
+                                  value={question.questionSubtext}
+                                  onChange={(e) => handleChangeQuestionSubtext(index, e.target.value)}
+                                />
+                              </FormField>
+                              {question.questionTypeId !== 3 && question.choice.map((option, optionIndex) => (
+                                <div key={optionIndex}>
+                                  <FormField>
+                                    <Grid verticalAlign="middle" centered>
+                                      <GridRow>
+                                        <GridColumn width={1}>
+                                          <label>{question.questionTypeId === 1 ? <Radio disabled /> : <Checkbox disabled />}</label>
+                                        </GridColumn>
+                                        <GridColumn width={10}>
+                                          <Input
+                                            placeholder='オプション'
+                                            value={option.choiceText}
+                                            onChange={(e) => handleChangeOption(index, optionIndex, e.target.value)}
+                                          />
+                                        </GridColumn>
+                                        <GridColumn width={5}>
+                                          <Button icon='copy' onClick={() => handleCopyOption(index, optionIndex)} />
+                                          <Button icon='trash' onClick={() => handleDeleteOption(index, optionIndex)} />
+                                          <Button icon='arrow down' onClick={() => handleMoveOptionDown(index, optionIndex)} />
+                                          <Button icon='arrow up' onClick={() => handleMoveOptionUp(index, optionIndex)} />
+                                        </GridColumn>
+                                      </GridRow>
+                                    </Grid>
+                                  </FormField>
+                                </div>
+                              ))}
+                              {question.questionTypeId === 3 && (
+                                <Segment basic textAlign="right">
+                                  <Checkbox label="必須" toggle checked={question.requireFlag} onChange={() => handleToggleRequired(index)} />
+                                </Segment>
+                              )}
+                            </Form>
+                            {question.questionTypeId !== 3 && (
+                              <Segment basic>
+                                <Grid verticalAlign='middle'>
+                                  <GridRow>
+                                    <GridColumn width={6}>
+                                      <Button onClick={() => handleAddOption(index)}>オプションを追加</Button>
+                                    </GridColumn>
+                                    <GridColumn width={10} textAlign="right">
+                                      <Checkbox label="必須にする" toggle checked={question.requireFlag} onChange={() => handleToggleRequired(index)} />
+                                      <Checkbox style={{ marginLeft: '10px' }} label="複数回答にする" toggle checked={question.questionTypeId === 2} onChange={() => handleToggleMultiple(index)} />
+                                    </GridColumn>
+                                  </GridRow>
+                                </Grid>
+                              </Segment>
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </CardGroup>
+              </Segment>
+              <Segment basic>
+                <Dropdown text='新規追加' pointing="top left" button>
+                  <Dropdown.Menu>
+                    <Dropdown.Item text="テキスト・自由記述" onClick={() => handleAddQuestion('text')}></Dropdown.Item>
+                    <Dropdown.Item text="単一選択" onClick={() => handleAddQuestion('radio')}></Dropdown.Item>
+                    <Dropdown.Item text="複数選択" onClick={() => handleAddQuestion('checkbox')}></Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Segment>
+            </div>
+          )}
+        </Container>
+      )
+    }
+
+    const Preview = ({ questions }) => (
+      <Container>
+        {questions.map((question, index) => (
+          <Segment key={index} basic>
+            <p>{`${index + 1}. ${question.questionText}${question.requireFlag ? ' *' : ''}`}</p>
+            <Form>
+              {question.questionTypeId === 3 ? (
+                <Segment basic>
+                  <FormField>
+                    <TextArea placeholder='回答を入力してください。' />
+                  </FormField>
+                </Segment>
+              ) : (
+                question.choice.map((option, optionIndex) => (
+                  <Segment basic key={optionIndex}>
+                    <FormField>
+                      {question.questionTypeId === 1 ? (
+                        <Radio label={option.choiceText} name={`question_${index}`} />
+                      ) : (
+                        <Checkbox label={option.choiceText} />
+                      )}
+                    </FormField>
+                  </Segment>
+                ))
+              )}
+            </Form>
+          </Segment>
+        ))}
+        <Segment basic>
+          <Button>送信</Button>
+        </Segment>
+      </Container>
+    );
+
+    const container = document.getElementById("app");
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+  </script>
+
+  <script>
+    window.difyChatbotConfig = {
+      token: 'BTsl9RjTIiUDQoU2',
+      baseUrl: 'http://localhost',
+      draggable: true,
+    }
+  </script>
+  <script src="http://localhost/embed.min.js" id="BTsl9RjTIiUDQoU2" defer>
+  </script>
+  <style>
+    #dify-chatbot-bubble-button {
+      background-color: #1C64F2 !important;
+    }
+  </style>
+</body>
+
+</html>
