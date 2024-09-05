@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>React!</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    #drugAndDropIcon {
+      background-image: url('img/drag.png');
+      margin: auto;
+      background-size: cover;
+      width: 26px;
+      height: 20px;
+      cursor: grab;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <link async rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2/dist/semantic.min.css" />
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js" crossorigin></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/semantic-ui-react/dist/umd/semantic-ui-react.min.js"></script>
+
+  <script type="text/babel">
+    const { FormField, Form, Input, Icon, CardGroup, Card, CardContent, CardHeader, Container, Button, Segment, Dropdown, Menu, Checkbox, GridRow, GridColumn, Grid, Divider, Radio, Label, TextArea, Image } = semanticUIReact
+
+    const useState = React.useState;
+    const useEffect = React.useEffect;
+
+    const App = () => {
+      const [input, setInput] = useState('');
+      const [messages, setMessages] = useState([]);
+
+      useEffect(() => {
+        setMessages([{ text: '何か文章を書いてね', sender: 'bot' }]);
+      }, []);
+
+      const handleInputChange = (event) => {
+        setInput(event.target.value);
+      }
+
+      const handleSubmit = async (event) => {
+        event.preventDefault();
+        setMessages(messages => [...messages, { text: input, sender: 'user' }]);
+        setInput('');
+        try {
+          console.log('input', input);
+          // const response = await fetch(process.env.REACT_APP_API_ENDPOINT, {
+          //   method: 'POST',
+          //   headers: {
+          //     'Content-Type': 'application/x-www-form-urlencoded'
+          //   },
+          //   body: new URLSearchParams({
+          //     apikey: process.env.REACT_APP_API_KEY,
+          //     query: input
+          //   })
+          // });
+          // const data = await response.json();
+          // if (data.status === 0) {
+          if (true) {
+            setMessages(messages => [...messages, { text: "aa", sender: 'bot' }]);
+            // setMessages(messages => [...messages, { text: data.results[0].reply, sender: 'bot' }]);
+          } else {
+            setMessages(messages => [...messages, { text: 'Error: Unable to generate response', sender: 'bot' }]);
+          }
+        } catch (error) {
+          setMessages(messages => [...messages, { text: 'Error: Failed to fetch data from API', sender: 'bot' }]);
+        }
+      }
+
+      return (
+        <div className="chatbot">
+          <ul className="messages">
+            {messages.map((message, index) => (
+              <li key={index} className={message.sender}>
+                <img src={`/${message.sender}.png`} alt={message.sender} />
+                <span>{message.text}</span>
+              </li>
+            ))}
+          </ul>
+          <form onSubmit={handleSubmit}>
+            <input type="text" value={input} onChange={handleInputChange} />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      );
+    }
+    const container = document.getElementById("app");
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+  </script>
+</body>
+
+</html>
